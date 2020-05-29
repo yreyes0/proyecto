@@ -1,0 +1,47 @@
+version: "2"
+services:
+  jellyfin:
+    image: linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - UMASK_SET=022 #opcional
+    volumes:
+      - /home/vagrant/jellyfin/multimedia/library:/config
+      - /home/vagrant/jellyfin/multimedia/tvseries:/data/tvshows
+      - /home/vagrant/jellyfin/multimedia/movies:/data/movies
+      - /home/vagrant/jellyfin/multimedia/images:/data/images
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      #- TRANSMISSION_WEB_HOME=/combustion-release/ #opcional
+      #- USER=username #opcional
+      #- PASS=password #opcional
+    volumes:
+      - /home/vagrant/jellyfin/multimedia/library:/config
+      - /home/vagrant/jellyfin/multimedia/movies:/downloads
+      - /home/vagrant/jellyfin/multimedia/tvseries:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+
+  jdownloader-2:
+    image: jlesage/jdownloader-2
+    ports:
+      - "5800:5800"
+    volumes:
+      - /home/vagrant/jellyfin/multimedia/library:/config:rw
+      - /home/vagrant/jellyfin/multimedia/movies:/output:rw
+      - /home/vagrant/jellyfin/multimedia/tvseries:/watch:rw
