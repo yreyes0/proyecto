@@ -1,4 +1,4 @@
-version: "2"
+version: "3.3"
 services:
   jellyfin:
     image: linuxserver/jellyfin
@@ -25,8 +25,8 @@ services:
       - PGID=1000
       - TZ=Europe/London
       #- TRANSMISSION_WEB_HOME=/combustion-release/ #opcional
-      #- USER=username #opcional
-      #- PASS=password #opcional
+      - USER=Dockplay
+      - PASS=Dockplay
     volumes:
       - /home/vagrant/jellyfin/multimedia/library:/config
       - /home/vagrant/jellyfin/multimedia/movies:/downloads
@@ -37,11 +37,28 @@ services:
       - 51413:51413/udp
     restart: unless-stopped
 
-  jdownloader-2:
-    image: jlesage/jdownloader-2
-    ports:
-      - "5800:5800"
+  db:
+    image: mysql:5.7
     volumes:
-      - /home/vagrant/jellyfin/multimedia/library:/config:rw
-      - /home/vagrant/jellyfin/multimedia/movies:/output:rw
-      - /home/vagrant/jellyfin/multimedia/tvseries:/watch:rw
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: HfPM9H8Xhp
+      MYSQL_DATABASE: dockplaydb
+      MYSQL_USER: yeinel
+      MYSQL_PASSWORD: HfPM9H8Xhp
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - "8080:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: yeinel
+      WORDPRESS_DB_PASSWORD: HfPM9H8Xhp
+      WORDPRESS_DB_NAME: dockplaydb
+volumes:
+    db_data: {}
